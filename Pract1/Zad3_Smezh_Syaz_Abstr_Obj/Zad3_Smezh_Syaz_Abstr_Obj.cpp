@@ -20,17 +20,23 @@ vector<int> InputValueSmezh(vector<int> Vec)
     cin >> Input;
 
     Vec.push_back(0);
-    int Leng = Vec.size();
 
-    if (Vec.size() == Place)
+    if ((Vec.size() != Place) && (Vec.size() > 1))
     {
-        for (int INewNodeex = Leng - 1; INewNodeex >= Place - 1; INewNodeex--)
+        for (int INewNodeex = Vec.size() - 2; INewNodeex >= Place - 1; INewNodeex--)
         {
             Vec[INewNodeex + 1] = Vec[INewNodeex];
         }
     }
-
-    Vec[Place - 1] = Input;
+    
+    if (Vec.size() > 1)
+    {
+        Vec[Place - 1] = Input;
+    }
+    else
+    {
+        Vec[0] = Input;
+    }
 
     return Vec;
 }
@@ -41,13 +47,9 @@ vector<int> DelValueSmezh(vector<int> Vec)
     cout << "\nВведите номер элемента на исключение из списка:\n";
     cin >> Place;
 
-
-    Vec.push_back(0);
-    int Leng = Vec.size();
-
-    for (int INewNodeex = Place + 1; INewNodeex <= Leng - 1; INewNodeex++)
+    for (int INewNodeex = Place; INewNodeex <= Vec.size() - 1; INewNodeex++)
     {
-        Vec[INewNodeex] = Vec[INewNodeex - 1];
+        Vec[INewNodeex - 1] = Vec[INewNodeex];
     }
 
     Vec.pop_back();
@@ -65,117 +67,91 @@ void OutputValuesSmezh(vector<int> Vec)
     cout << "\n";
 }
 
-template <typename T>
-class SvyazContainer {
+class SvyazContainer
+{
 public:
-    SvyazContainer() {
+    SvyazContainer() 
+    {
         m_start = m_end = nullptr;
         m_size = 0;
     }
     ~SvyazContainer() { Clear(); }
-    void Push_Front(const T& data) {
-        if (m_start) {
+    void Push_Front(int data) 
+    {
+        if (m_start)
+        {
             Node* new_node = new Node();
             new_node->data = data;
             new_node->next = m_start;
             m_start->prev = new_node;
             m_start = new_node;
         }
-        else {
+        else 
+        {
             Initialize(data);
         }
         m_size++;
     }
-    void Pop_Front() {
-        if (!m_start) return;
-        if (m_start->next) {
-            Node* next = m_start->next;
-            next->prev = nullptr;
-            delete m_start;
-            m_start = next;
-        }
-        else {
-            delete m_start;
-            m_start = m_end = nullptr;
-        }
-        m_size--;
-    }
-    void Push_Back(const T& data) {
-        if (m_end) {
+    void Push_Back(int data) 
+    {
+        if (m_end) 
+        {
             Node* new_node = new Node();
             new_node->data = data;
             new_node->prev = m_end;
             m_end->next = new_node;
             m_end = new_node;
         }
-        else {
+        else 
+        {
             Initialize(data);
         }
         m_size++;
     }
-    void Pop_Back() {
-        if (!m_end) return;
-        if (m_end->prev) {
-            Node* prev = m_end->prev;
-            prev->next = nullptr;
-            delete m_end;
-            m_end = prev;
+    void Remove_One(int Index) 
+    {
+        Index--;
+        if ((Index < 0) || (Index >= m_size) || (m_size == 0))
+        {
+            cout << "Номер элемента не может быть меньше нуля и больше размера списка! Невозможно удаление из пустого списка!";
         }
-        else {
-            delete m_end;
-            m_start = m_end = nullptr;
+        else if (Index == 0)
+        {
+            Node* tmp = m_start;
+            cout << endl << tmp->data << endl;
+            Remove_Node(tmp);
         }
-        m_size--;
-    }
-    void Sort(function<bool(const T&, const T&)> cmp) {
-        if (!m_start) return;
-        Node* tmp = m_start;
-        while (tmp) {
-            Node* tmp_next = tmp->next;
-            while (tmp_next) {
-                if (cmp(tmp->data, tmp_next->data))
-                    swap(tmp->data, tmp_next->data);
-                tmp_next = tmp_next->next;
-            }
-            tmp = tmp->next;
+        else if (Index == m_size - 1)
+        {
+            Node* tmp = m_end;
+            cout << endl << tmp->data << endl;
+            Remove_Node(tmp);
         }
-    }
-    void Remove_One(function<bool(const T&)> cnd) {
-        Node* tmp = m_start;
-        while (tmp) {
-            if (cnd(tmp->data)) {
-                Remove_Node(tmp);
-                return;
-            }
-            tmp = tmp->next;
-        }
-    }
-    void Remove_All(function<bool(const T&)> cnd) {
-        Node* tmp = m_start;
-        while (tmp) {
-            if (cnd(tmp->data)) {
-                Node* bck = nullptr;
-                if (tmp->prev)
-                    bck = tmp->prev;
-                else if (tmp->next)
-                    bck = tmp->next;
-                Remove_Node(tmp);
-                if (!bck) return;
-                tmp = bck;
-            }
-            else {
+        else
+        {
+            int Jindex = 0;
+            Node* tmp = m_start;
+            while (Jindex != Index)
+            {
                 tmp = tmp->next;
+                Jindex++;
             }
+            cout << endl << tmp->data << endl;
+            Remove_Node(tmp);
         }
     }
-    void Clear() {
+    void Clear() 
+    {
         if (!m_start) return;
-        if (m_start == m_end) {
+        if (m_start == m_end) 
+        {
             delete m_start;
         }
-        else {
+        else 
+        {
             Node* tmp = m_start;
-            while (tmp != m_end) {
+            while (tmp != m_end) 
+            {
                 Node* next = tmp->next;
                 delete tmp;
                 tmp = next;
@@ -184,41 +160,50 @@ public:
         m_size = 0;
         m_start = m_end = nullptr;
     }
-    void For_Each(function<void(T&)> fun) {
-        Node* tmp = m_start;
-        while (tmp) {
-            fun(tmp->data);
-            tmp = tmp->next;
-        }
-    }
     inline size_t Size() const noexcept { return m_size; }
-    SvyazContainer<T>& operator=(SvyazContainer<T>&& other) noexcept {
+    SvyazContainer operator=(SvyazContainer& other) noexcept 
+    {
         Clear();
         Node* tmp = other.m_start;
-        while (tmp) {
+        while (tmp) 
+        {
             Push_Back(tmp->data);
             tmp = tmp->next;
         }
         other.Clear();
         return *this;
     }
+    void PrintList()
+    {
+        Node* Current = m_start;
+        while (Current)
+        {
+            cout << Current->data << " ";
+            Current = Current->next;
+        }
+        cout << endl;
+    }
 private:
-    struct Node {
-        Node() {
+    struct Node 
+    {
+        Node() 
+        {
             next = nullptr;
             prev = nullptr;
         }
         ~Node() = default;
-        T data;
+        int data;
         Node* next;
         Node* prev;
     };
-    void Initialize(const T& data) {
+    void Initialize(const int data) 
+    {
         m_start = new Node();
         m_start->data = data;
         m_end = m_start;
     }
-    void Remove_Node(Node* node) {
+    void Remove_Node(Node* node) 
+    {
         Node* prev = node->prev;
         Node* next = node->next;
         if (prev != nullptr) prev->next = next;
@@ -252,11 +237,11 @@ void SmezhWhile()
         switch (Choice)
         {
         case 1:
-            InputValueSmezh(Vec);
+            Vec = InputValueSmezh(Vec);
             break;
 
         case 2:
-            DelValueSmezh(Vec);
+            Vec = DelValueSmezh(Vec);
             break;
 
         case 3:
@@ -275,7 +260,56 @@ void SmezhWhile()
 
 void SvyazWhile()
 {
+    bool ContinuousWhile = true;
+    SvyazContainer SvyazCont;
+    cout << "\nСоздан пустой связанный список. \n";
+    int Choice = 0;
 
+    while (ContinuousWhile)
+    {
+        cout << "\nВыберите действие со смежным списком:\n";
+        cout << "1)введите <1> для включения нового числа в начало списка из " << SvyazCont.Size() << " элементов;\n";
+        cout << "2)введите <2> для включения нового числа в конец списка из " << SvyazCont.Size() << " элементов;\n";
+        cout << "3)введите <3> для исключения числа из списка из " << SvyazCont.Size() << " элементов по номеру;\n";
+        cout << "4)введите <4> для вывода всего списка;\n";
+        cout << "0)введите <0> для выхода в главное меню.\n";
+        cin >> Choice;
+
+        int TmpNum;
+
+        switch (Choice)
+        {
+        case 1:
+            cout << "\nВведите новое число:\n";
+            cin >> TmpNum;
+            SvyazCont.Push_Front(TmpNum);
+            break;
+
+        case 2:
+            cout << "\nВведите новое число:\n";
+            cin >> TmpNum;
+            SvyazCont.Push_Back(TmpNum);
+            break;
+
+        case 3:
+            cout << "\nВведите номер элемента для удаления:\n";
+            cin >> TmpNum;
+            SvyazCont.Remove_One(TmpNum);
+            break;
+
+        case 4:
+            cout << "Вывод всех элементов:";
+            SvyazCont.PrintList();
+            break;
+
+        case 0:
+            ContinuousWhile = !ContinuousWhile;
+            break;
+
+        default:
+            break;
+        }
+    }
 }
 
 int main()
